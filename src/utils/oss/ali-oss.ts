@@ -1,8 +1,8 @@
 import OSS from 'ali-oss'
 
 const client = new OSS({
-    region: 'https://oss-cn-shanghai.aliyuncs.com',
-    accessKeyId: 'LTAI5tGbr1Rz9jz67rW2Pie1',
+    region: 'xxxx',
+    accessKeyId: 'xxxx',
     accessKeySecret: 'xxxxxx',
     bucket: 'teclips'
 });
