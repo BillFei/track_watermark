@@ -10,7 +10,11 @@ import 'element-plus/theme-chalk/el-message.css'
 import 'element-plus/theme-chalk/el-message-box.css'
 import './iconfont/iconfont.css'
 import { setupAntd } from "./ant-design";
+import vue3GoogleLogin from 'vue3-google-login';
 const app = createApp(App)
+createApp(App).use(vue3GoogleLogin, {
+    clientId: '758687148578-8mg5p65q2rbmj8vhoam5vsivvomlug4e.apps.googleusercontent.com' // 替换为你的客户端ID
+})
 app.use(i18n)
 setupAntd(app);
 app.use(VueClipboard)
