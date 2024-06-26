@@ -7,7 +7,8 @@
             <el-upload
                 class="upload"
                 drag
-                action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+                action="#"
+                :before-upload="beforeUpload"
                 :on-success="handleSucess"
                 :on-error="handleError"
                 :on-remove="handleRemove"
@@ -20,6 +21,7 @@
                   round
                   size="large"
                   class="upload-btn"
+                  @click="submitUpload"
                 >
                   Upload Video
                 </el-button>
@@ -82,16 +84,38 @@
 </template>
 
 <script lang="ts" setup>
+  import { ref } from 'vue'
   import { ElMessageBox, ElMessage } from 'element-plus'
   import { useRouter, Router } from 'vue-router'
   import { storeToRefs } from 'pinia'
   import { useTrackStore } from '@/store/track'
+  import OssClient from '@/utils/oss/ali-oss';  
 
   const trackStore = useTrackStore()
 
-  const handleSucess = (file) => {
-    console.log(file.name)
+  const uploadUrl = ''
+  const uploadFile = ref(null)
+
+  const beforeUpload = (file) =>{
+      // 可以选择在这里进行文件类型或大小的校验
+      uploadFile.value = file;
   }
+
+  function submitUpload(){
+    const fileName  = `remove_${new Date().getTime()}_${uploadFile}`
+    try {
+      const result =  OssClient.put(fileName, uploadFile);
+      console.log('Upload result:', result);
+      ElMessage.success('视频上传成功');
+    } catch (error) {
+      ElMessage.error('视频上传失败');
+    }
+  }
+
+  const handleSucess = (file) => {
+    console.log(file)
+  }
+
 
   const handleError = (file) => {
     trackStore.updateUploadInfo({
