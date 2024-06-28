@@ -1,4 +1,7 @@
 import request from "@/utils/request";
+import { log } from "console";
+import { da } from "element-plus/es/locale";
+import { json } from "stream/consumers";
 
 // 创建验证码
 export const getCaptcha = (id?:string) => {
@@ -22,4 +25,12 @@ export const login = (data: object) => {
   });
 };
 
+//注册
+export const register = (data: object) =>{
+  return request({
+    url: "/user",
+    method: "POST",
+    data,
+  });
+}
 

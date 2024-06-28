@@ -3,7 +3,7 @@ import { ElMessage,ElLoading } from 'element-plus'
 //创建axios实例
 const request = axios.create({
     // 服务接口请求
-    baseURL:import.meta.env.VITE_BASE_API,
+    baseURL:import.meta.env.VITE_BASE_API+'api',
     // 超时设置
     timeout: 30000,
     headers:{
@@ -20,7 +20,13 @@ request.interceptors.request.use(
       //   text: 'Loading',
       //   background: 'rgba(0, 0, 0, 0.7)',
       // })
-       
+      if("/login" == config.url){
+        config.headers['Content-Type'] = 'multipart/form-data'
+        config.data = {
+          username:config.data.username,
+          password:config.data.password
+        }
+      }
       return config;
     },
     
@@ -68,9 +74,9 @@ request.interceptors.request.use(
       const { status } = response;
       // loading.close()
     
-      if (status === 200) {
+      if (status === 200 || status === 201) {
        
-    return res
+     return res
       }else if(status===403&&status===401){
         localStorage.removeItem('token')
         localStorage.removeItem('userInfo')
