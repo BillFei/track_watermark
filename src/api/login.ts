@@ -34,3 +34,11 @@ export const register = (data: object) =>{
   });
 }
 
+//用戶信息
+export const getUserInfo = (data: object) =>{
+  return request({
+    url: "/user/me/",
+    method: "GET",
+    data,
+  });
+}

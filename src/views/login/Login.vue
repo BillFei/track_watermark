@@ -282,8 +282,8 @@ const signUp = ()=>{
     registerMatch.matchREmail = true
     return
   }
-  // const emailMatch = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-  const emailMatch = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{4,15}[a-zA-Z0-9]{1,1}$/ 
+  const emailMatch = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  // const emailMatch = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{4,15}[a-zA-Z0-9]{1,1}$/ 
   if(!emailMatch.test(registerForm.username)){
     registerMatch.noMatchREmail = true
     return

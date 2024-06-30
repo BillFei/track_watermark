@@ -17,10 +17,10 @@
     <div>
       <el-button
       link
-      size="large"
-      @click="login"
+      size="large" 
+      @click="userInfo?'':'login'"
     >
-      Login
+      {{userInfo?userInfo.username:'Login'}}
     </el-button>
     <el-button
       text
@@ -35,13 +35,14 @@
   </a-layout-header>
 </template>
 <script lang="ts" setup>
-import {  onMounted,ref,watch,h } from 'vue'
+import {  onMounted,ref,watch,h  } from 'vue'
 import { useLayoutStore } from '@/store/layout'
 import { storeToRefs } from 'pinia'
 import { useRouter, Router } from 'vue-router'
 import {getProjects} from '@/api/project'
 import {useProjectStore} from '@/store/project'
 import { ElMessage } from 'element-plus';
+import { json } from 'stream/consumers'
 
 const current = ref(['mail'])
 const activeIndex = ref('1')
@@ -55,6 +56,8 @@ const menuItem = [{
   label: 'Price',
   title: 'Price'
 }]
+
+const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
 const items = ref(menuItem)
 

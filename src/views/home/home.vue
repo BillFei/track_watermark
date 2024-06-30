@@ -47,6 +47,7 @@
   import { useRouter, Router } from 'vue-router'
   import { storeToRefs } from 'pinia'
   import { useTrackStore } from '@/store/track'
+  import {getUserInfo} from '@/api/login'
 
   const router=useRouter()
 
@@ -54,6 +55,17 @@
 
   const handleSucess = (file) => {
     console.log(file.name)
+  }
+
+  if(localStorage.getItem("token")){
+    getUserInfo().then(res=>{
+    console.log(res)
+    if(res.status_code === 200) {
+			localStorage.setItem('userInfo',JSON.stringify(res.data))
+		}else{
+			ElMessage .error(res.detail);
+		}
+  })
   }
 
   const handleError = (file) => {
