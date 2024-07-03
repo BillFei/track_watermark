@@ -5,12 +5,12 @@
       <el-tab-pane label="Login" name="login" class="lg-pane">
         <el-row justity="center" style="margin-top: 20px;">
           <el-col :span="24" :push="4">
-            <!-- <el-button size="large" @click="googleLogin" class="bt"  round><img class="img-icon" src="https://accounts.kaleido.ai/assets/login_google-2cb4e02cffa10e473b6e3549e711d537a2311783b8ddf497d3f2616a2784d41f.svg">
+            <el-button size="large" @click="googleLogin" class="bt"  round><img class="img-icon" src="https://accounts.kaleido.ai/assets/login_google-2cb4e02cffa10e473b6e3549e711d537a2311783b8ddf497d3f2616a2784d41f.svg">
             以 Google 账户继续
-          </el-button> -->
-          <GoogleLogin :callback="onGoogleLoginSuccess" prompt>
+          </el-button>
+          <!-- <GoogleLogin :callback="onGoogleLoginSuccess" prompt>
             <button class="bt"><img class="img-icon" src="https://accounts.kaleido.ai/assets/login_google-2cb4e02cffa10e473b6e3549e711d537a2311783b8ddf497d3f2616a2784d41f.svg">以 Google 账户继续</button>
-          </GoogleLogin>
+          </GoogleLogin> -->
         </el-col>
           <el-col :span="24" :push="4">
             <el-button size="large" @click="facebookLogin" class="bt" round>
