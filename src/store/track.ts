@@ -11,14 +11,14 @@ interface UserInfo {
     phone: string
     email: string
     type: string
-    credit: int
+    credit: number
     token: string
 }
 
 interface VideoInfo {
     name: string | null
     uploadOSSURL: string | null
-    downloadOSSURL: string | null
+    downloadOSSURL: string | Object | null
 }
 
 interface UploadInfo {
@@ -26,12 +26,13 @@ interface UploadInfo {
     isUpload: boolean
     isInpainted: boolean
     uploadOSSURL: string | null
+    localfile: string | Object
 }
 
-interface dowloadInfo {
+interface DownloadInfo {
     fileName: string
     needCredit: boolean
-    downloadOSSURL: string
+    downloadOSSURL: string | Object | null
 }
 
 interface LanguageInfo {
@@ -43,7 +44,7 @@ export const useTrackStore = defineStore("track", {
     //定义状态
     state: () =>{
         return {
-            user:{
+            userInfo:{
                 name:'',
                 phone:'',
                 email:'',
@@ -63,7 +64,13 @@ export const useTrackStore = defineStore("track", {
                 fineName:'',
                 isUpload: false,
                 isInpainted: false,
-                uploadOSSURL: null
+                uploadOSSURL: null,
+                localfile: null
+            },
+            downloadInfo: {
+                fileName: '',
+                needCredit: false,
+                downloadOSSURL: null
             }
         }
     },
@@ -75,8 +82,14 @@ export const useTrackStore = defineStore("track", {
         getLang(state){
             return state.lang.lng
         },
+        getVideoInfo(state){
+            return state.video
+        },
         getUploadInfo(state) {
             return state.uploadInfo
+        },
+        getDownloadInfo(state) {
+            return state.downloadInfo
         }
     },
     //定义提交函数
@@ -95,6 +108,15 @@ export const useTrackStore = defineStore("track", {
         },
         updateInpainted(uploadInfo: UploadInfo) {
             this.uploadInfo.isInpainted = uploadInfo.isInpainted
+        },
+        updateVideoUploadLocalFile(uploadInfo: UploadInfo) {
+            this.uploadInfo.localfile = uploadInfo.localfile
+        },
+        updateVideoUploadOSSURL(uploadInfo: UploadInfo) {
+            this.uploadInfo.uploadOSSURL = uploadInfo.uploadOSSURL
+        },
+        updateDownloadFile(downloadInfo: DownloadInfo) {
+            this.downloadInfo.downloadOSSURL = downloadInfo.downloadOSSURL
         }
     }
 })

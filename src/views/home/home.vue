@@ -16,11 +16,15 @@
             <el-upload
                 class="upload"
                 drag
-                action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+                action="#"
                 :on-success="handleSucess"
                 :on-error="handleError"
                 :on-remove="handleRemove"
                 :on-preview="handlePreview"
+                :before-upload="handleUpload"
+                :on-change="handleVideoChange"
+                :auto-upload="false"
+                accept="video/*"
                 multiple
               >
                 <el-button
@@ -48,13 +52,60 @@
   import { storeToRefs } from 'pinia'
   import { useTrackStore } from '@/store/track'
   import {getUserInfo} from '@/api/login'
+  import {client,signatureUrl,uploadVideo} from '@/utils/ali-oss'
 
   const router=useRouter()
 
   const trackStore = useTrackStore()
 
+  // 进入首页就将上传标志为恢复成false
+  trackStore.updateUploadInfo({
+    isUpload: false
+  })
+
   const handleSucess = (file) => {
-    console.log(file.name)
+    trackStore.updateUploadInfo({
+      isUpload: true
+    })
+    router.push({
+      name: 'Remove'
+    })
+  }
+
+  const handleUpload = (file) => {
+    const isVideo = file.type.startsWith('video/');
+    if (!isVideo) {
+      ElMessage.error('Please upload the video file!');
+      return
+    }
+    trackStore.updateVideoUploadLocalFile({
+      localfile: URL.createObjectURL(file)
+    })
+    console.log(file)
+  }
+
+  const handleVideoChange = (file)=>{
+    console.log('视频文件：',file)
+    const fileName = `${Date.now()}-${file.name}`;
+    const files = file.raw
+    console.log(fileName)
+    const headers = {token:'123456'}
+    client.put(fileName, files,{headers}).then(res => {     
+      // 上传成功之后，转换真实的地址
+      signatureUrl(fileName).then( res => { 
+        trackStore.updateVideoUploadOSSURL({
+          uploadOSSURL: res
+        })
+        trackStore.updateUploadInfo({
+          isUpload: true
+        })
+        router.push({
+          name: 'Remove'
+        })
+      })
+    }).catch( err => { 
+      console.log('上传失败',err)
+    })
   }
 
   if(localStorage.getItem("token")){
@@ -69,12 +120,7 @@
   }
 
   const handleError = (file) => {
-    trackStore.updateUploadInfo({
-      isUpload: true
-    })
-    router.push({
-      name: 'Remove'
-    })
+    ElMessage.error('Please upload a video file again!');
   }
 
   const handleRemove = (file) => {

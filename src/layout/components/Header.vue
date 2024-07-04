@@ -39,8 +39,6 @@ import {  onMounted,ref,watch,h  } from 'vue'
 import { useLayoutStore } from '@/store/layout'
 import { storeToRefs } from 'pinia'
 import { useRouter, Router } from 'vue-router'
-import {getProjects} from '@/api/project'
-import {useProjectStore} from '@/store/project'
 import { ElMessage } from 'element-plus';
 import { json } from 'stream/consumers'
 
@@ -62,23 +60,6 @@ const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 const items = ref(menuItem)
 
 const router=useRouter()
-// const userFunction=ref<any>([{
-//     name:'api_key',
-//     path:'/apikeys'
-// },{
-//     name:'login_out',
-// }])
-// const goOtherPage=(path:string)=>{
-//     if(path){
-//       router.push({path})
-//     }else{
-//         ElMessage.success('退出成功')
-//         router.push({path:'/login'})
-//      localStorage.removeItem('token')
-//      localStorage.removeItem('userInfo')
-//     }
-    
-// }
 
 const handleSelect = (key: string, keyPath: string[]) => {
   if (key == '1') {
@@ -95,7 +76,7 @@ const handleSelect = (key: string, keyPath: string[]) => {
 }
 
 const login = () =>{
-  router.push({path:'/login'})
+  router.push({name:'/login'})
 }
 </script>
 <style lang="scss" scoped>
