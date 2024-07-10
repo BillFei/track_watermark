@@ -18,7 +18,7 @@
       <el-button
       link
       size="large" 
-      @click="userInfo?'':'login'"
+      @click="userInfo?'':login"
     >
       {{userInfo?userInfo.username:'Login'}}
     </el-button>
@@ -55,7 +55,7 @@ const menuItem = [{
   title: 'Price'
 }]
 
-const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+const userInfo = localStorage.getItem('userInfo')?JSON.parse(localStorage.getItem('userInfo')):'';
 
 const items = ref(menuItem)
 
@@ -76,7 +76,7 @@ const handleSelect = (key: string, keyPath: string[]) => {
 }
 
 const login = () =>{
-  router.push({name:'/login'})
+  router.push({name:'Login'})
 }
 </script>
 <style lang="scss" scoped>

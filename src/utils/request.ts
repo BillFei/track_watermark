@@ -20,12 +20,12 @@ request.interceptors.request.use(
       //   text: 'Loading',
       //   background: 'rgba(0, 0, 0, 0.7)',
       // })
-      if("/login" == config.url){
+      if("/v1/login" == config.url){
         config.headers['Content-Type'] = 'multipart/form-data'
-        config.data = {
-          username:config.data.username,
-          password:config.data.password
-        }
+        // config.data = {
+        //   username:config.data.username,
+        //   password:config.data.password
+        // }
       }
       return config;
     },
@@ -91,9 +91,13 @@ request.interceptors.request.use(
   
     (error) => {
        if(error.response.status===401){
-        localStorage.removeItem('token')
-        localStorage.removeItem('userInfo')
-        window.location.href = '#/login';
+        if(error.config.url==='/v1/login'){
+          ElMessage.error('The user name or password is incorrect，please check and try again')
+        }else{
+          localStorage.removeItem('token')
+          localStorage.removeItem('userInfo')
+          window.location.href = '#/login';
+        }
        }
       // Message({ message, type: 'error' });
       // console.log(error.response);
@@ -105,7 +109,7 @@ request.interceptors.request.use(
       //     type: 'error',
       //   });
       // }
-      if (error.response.data&&error.response.data.message.includes('internal=Token is expired')) {
+      if (error.response.data&&error.response.data.detail.includes('internal=Token is expired')) {
         if (document.getElementsByClassName('el-message--warning').length < 1) {
             ElMessage({
             message: 'Session expired! Please log in again.',

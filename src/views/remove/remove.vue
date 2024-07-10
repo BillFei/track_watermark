@@ -72,7 +72,7 @@
                 playsinline="true"
                 fluid="true"
                 controls="true"
-                :src="trackStore.getUploadInfo.uploadOSSURL"></video>
+                :src="trackStore.getDownloadInfo.downloadOSSURL"></video>
             </div>
             <el-button
                   text
@@ -80,6 +80,7 @@
                   round
                   size="large"
                   class="upload-btn"
+                  @click="InpaiintOkViideo()"
                 >
                   Download Video
             </el-button>
@@ -91,19 +92,28 @@
 </template>
 
 <script lang="ts" setup>
-  import { ElMessageBox, ElMessage } from 'element-plus'
+  import { ElMessageBox, ElMessage, ElLoading} from 'element-plus'
   import { useRouter, Router } from 'vue-router'
   import { storeToRefs } from 'pinia'
   import { useTrackStore } from '@/store/track'
-  import {client,signatureUrl,uploadVideo} from '@/utils/ali-oss'
+  import {client,signatureUrl} from '@/utils/ali-oss'
   import { onMounted, ref } from 'vue'
+  import {uploadVideo,getVideoOneInfo} from '@/api/video'
+
+  const router=useRouter()
 
   const trackStore = useTrackStore()
   const uploadVideoOssAddress = ref('')
   const isUpload = ref(false)
-
+  const videoInfo = ref({
+    id:'',
+    videoName:''
+  });
+  const downloadUrl = ref('')
+  const userInfo = localStorage.getItem('userInfo')?JSON.parse(localStorage.getItem('userInfo')):'';
+  console.log(userInfo)
   onMounted(()=>{
-    console.log(client)
+    // console.log(client)
   })
 
   const handleSucess = (file) => {
@@ -111,14 +121,27 @@
   }
 
   const handleVideoChange = (file)=>{
-    console.log('视频文件：',file)
+    if(userInfo){
     const fileName = `${Date.now()}-${file.name}`;
+    videoInfo.value.videoName = fileName
     const files = file.raw
-    console.log(fileName)
-    const headers = {token:'123456'}
-    client.put(fileName, files,{headers}).then(res => {     
+    client.put(fileName, files).then(res => {     
+      const oss_path = res.url
       // 上传成功之后，转换真实的地址
       signatureUrl(fileName).then( res => { 
+        console.log('upload-----',res)
+        uploadVideo({
+          name:fileName,
+          oss_path:oss_path
+        },userInfo.username).then(res=>{
+          console.log('add------------------',res)
+          if(res.status === "PENDING") {
+            console.log("111111111")
+            videoInfo.value.id = res.id
+		      }else{
+            ElMessage .error("Upload failed, please try again");
+          }
+        })
         trackStore.updateVideoUploadOSSURL({
           uploadOSSURL: res
         })
@@ -129,15 +152,22 @@
     }).catch( err => { 
       console.log('上传失败',err)
     })
+    }else{
+        router.push({name:'Login'})
+    }
   }
 
   const beforeUpload = (file) => {
+    if(userInfo){
     // 可以在这里进行文件类型和大小的校验
-    const isVideo = file.type.startsWith('video/');
-    if (!isVideo) {
-      ElMessage.error('Please upload the video file!');
+      const isVideo = file.type.startsWith('video/');
+      if (!isVideo) {
+        ElMessage.error('Please upload the video file!');
+      }
+      return isVideo;
+    }else{
+      router.push({name:'Login'})
     }
-    return isVideo;
   }
 
   const handleError = (file) => {
@@ -153,12 +183,53 @@
 
   const handlePreview = (file) => {
 
-  }
+  } 
+
+ 
+  const intervalId = ref(null)
+  const loadingInstance  = ref(null);
 
   const inpaintClick = () => {
-    trackStore.updateInpainted({
-      isInpainted: true
+    loadingInstance.value = ElLoading.service({
+      text:'Under repair...'
+    }); // 开始加载
+    intervalId.value = setInterval(inpainting, 10000);
+  }
+
+  const inpainting = () =>{
+    const id = videoInfo.value.id
+    getVideoOneInfo(id,userInfo.username).then(res =>{
+      console.log(res)
+      if(res.status === "FINISHED"){
+        loadingInstance.value.close(); // 结束加载
+        clearInterval(intervalId.value);
+        const fileName = videoInfo.value.videoName
+        // const fileName = '1720619595936-aaa.mp4'
+        console.log(fileName)
+        signatureUrl(fileName).then( ress => { 
+          console.log(ress)
+          trackStore.updateInpainted({
+            isInpainted: true
+          })
+          downloadUrl.value = ress
+          trackStore.updateDownloadFile({
+            downloadOSSURL: ress
+          })
+        })
+      }
     })
+  }
+
+  //下载视频
+  const InpaiintOkViideo = () =>{
+    const link = document.createElement('a');
+    link.href = downloadUrl.value ; // 设置视频链接为href属性
+    link.download = 'Repaired_video.mp4'; // 设置下载时的文件名
+
+    // 模拟点击事件以触发下载
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link); // 清理DOM
   }
 
 </script>

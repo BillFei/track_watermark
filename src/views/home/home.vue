@@ -52,11 +52,13 @@
   import { storeToRefs } from 'pinia'
   import { useTrackStore } from '@/store/track'
   import {getUserInfo} from '@/api/login'
-  import {client,signatureUrl,uploadVideo} from '@/utils/ali-oss'
+  import {client,signatureUrl} from '@/utils/ali-oss'
+  import {uploadVideo} from '@/api/video'
 
   const router=useRouter()
 
   const trackStore = useTrackStore()
+  const videoInfo = ref('')
 
   // 进入首页就将上传标志为恢复成false
   trackStore.updateUploadInfo({
@@ -73,6 +75,7 @@
   }
 
   const handleUpload = (file) => {
+    if(localStorage.getItem('userInfo')){
     const isVideo = file.type.startsWith('video/');
     if (!isVideo) {
       ElMessage.error('Please upload the video file!');
@@ -82,17 +85,36 @@
       localfile: URL.createObjectURL(file)
     })
     console.log(file)
+  }else{
+    router.push({name:'Login'})
+  }
   }
 
   const handleVideoChange = (file)=>{
-    console.log('视频文件：',file)
+    if(localStorage.getItem('userInfo')){
     const fileName = `${Date.now()}-${file.name}`;
     const files = file.raw
-    console.log(fileName)
-    const headers = {token:'123456'}
-    client.put(fileName, files,{headers}).then(res => {     
+    client.put(fileName, files).then(res => {     
+      const oss_path = res.url
       // 上传成功之后，转换真实的地址
       signatureUrl(fileName).then( res => { 
+        const userInfo = localStorage.getItem('userInfo')?JSON.parse(localStorage.getItem('userInfo')):'';
+        uploadVideo({
+          name:fileName,
+          oss_path:oss_path
+        },userInfo.username).then(res=>{
+          if(!res.status === "PENDING") {
+            videoInfo.value = JSON.stringify(res)
+		      }else{
+            ElMessage .error("Upload failed, please try again");
+          }
+          // if(res.status_code === 200) {
+			    //   localStorage.setItem('userInfo',JSON.stringify(res.data))
+		      // }else{
+			    //   ElMessage .error(res.detail);
+		      // }
+        })
+
         trackStore.updateVideoUploadOSSURL({
           uploadOSSURL: res
         })
@@ -104,19 +126,24 @@
         })
       })
     }).catch( err => { 
+      ElMessage .error("Upload failed, please try again");
       console.log('上传失败',err)
     })
+  }else{
+        router.push({name:'Login'})
+    }
   }
 
   if(localStorage.getItem("token")){
-    getUserInfo().then(res=>{
-    console.log(res)
-    if(res.status_code === 200) {
-			localStorage.setItem('userInfo',JSON.stringify(res.data))
-		}else{
-			ElMessage .error(res.detail);
-		}
-  })
+    if(!localStorage.getItem('userInfo')){
+      getUserInfo().then(res=>{
+        if(res.status_code === 200) {
+          localStorage.setItem('userInfo',JSON.stringify(res.data))
+        }else{
+          ElMessage .error(res.detail);
+        }
+      })
+    }
   }
 
   const handleError = (file) => {

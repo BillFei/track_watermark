@@ -75,10 +75,10 @@
             </div>
           </el-col>
           <el-col>
-            <h3 style="color: #666;">Email</h3>
+            <h3 style="color: #666;">Email Or Phone number</h3>
             <el-input v-model="registerForm.username" style="width: 400px;height: 48px;font-size:24px;" @focus="handleREmailInputClick"/>
-            <el-alert title="Please enter your email address"  v-if="registerMatch.matchREmail"  type="error" show-icon @close="registerMatch.matchREmail = false"/>
-            <el-alert title="The mailbox format is incorrect"  v-if="registerMatch.noMatchREmail"  type="error" show-icon @close="registerMatch.noMatchREmail = false"/>
+            <el-alert title="Please enter your email address Or Phone number"  v-if="registerMatch.matchREmail"  type="error" show-icon @close="registerMatch.matchREmail = false"/>
+            <el-alert title="The mailbox Or Phone number format is incorrect"  v-if="registerMatch.noMatchREmail"  type="error" show-icon @close="registerMatch.noMatchREmail = false"/>
           </el-col>
           <el-col style="margin-top:20px;">
             <h3 style="color: #666;">Password (<span style="font-style: italic;">6 characters minimum</span>)</h3>
@@ -188,7 +188,9 @@ const loginInfo = reactive({
 const registerForm = reactive({
   username:'',
   password:'',
-  PasswordCf:''
+  PasswordCf:'',
+  email:'',
+  phone_number:''
 })
 
 //登录提示
@@ -275,6 +277,16 @@ const generateRandomMobileNumber = () => {
   return number;
 };
 
+//随机生成用户名
+const generateRandomString = (length) => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
 
 //注册
 const signUp = ()=>{
@@ -283,11 +295,18 @@ const signUp = ()=>{
     return
   }
   const emailMatch = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-  // const emailMatch = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{4,15}[a-zA-Z0-9]{1,1}$/ 
+  const PhoneNumberMatch = /^\+?(?:\d{1,3})?[-.\s]?(?:\(\d{1,4}\)|\d{1,4})[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/ 
   if(!emailMatch.test(registerForm.username)){
-    registerMatch.noMatchREmail = true
-    return
+    if(PhoneNumberMatch.test(registerForm.username)){
+      registerForm.phone_number = registerForm.username
+    }else{
+      registerMatch.noMatchREmail = true
+      return
+    }
+  }else{
+    registerForm.email = registerForm.username
   }
+  
 
   if(registerForm.password === ''){
     registerMatch.matchRPassword = true
@@ -310,9 +329,11 @@ const signUp = ()=>{
   }
 
   const regInfo = reactive({
-    username:registerForm.username,
+    username:generateRandomString(8),
     password:registerForm.password,
-    phone_number:generateRandomMobileNumber()
+    // phone_number:generateRandomMobileNumber()
+    phone_number:registerForm.phone_number,
+    email:registerForm.email
   })
 
   register(regInfo).then(res=>{
