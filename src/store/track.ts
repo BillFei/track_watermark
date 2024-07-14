@@ -16,9 +16,10 @@ interface UserInfo {
 }
 
 interface VideoInfo {
+    id: number | string | null
     name: string | null
-    uploadOSSURL: string | null
-    downloadOSSURL: string | Object | null
+    uploadInfo: UploadInfo | null
+    downloadInfo: DownloadInfo | null
 }
 
 interface UploadInfo {
@@ -55,10 +56,21 @@ export const useTrackStore = defineStore("track", {
             lang:{
                 lng:'en'
             },
-            video: {
+            videoInfo: {
+                id: '',
                 name:'',
-                uploadOSSURL: null,
-                downloadOSSURL: null
+                uploadInfo: {
+                    fineName:'',
+                    isUpload: false,
+                    isInpainted: false,
+                    uploadOSSURL: null,
+                    localfile: null
+                },
+                downloadInfo: {
+                    fileName: '',
+                    needCredit: false,
+                    downloadOSSURL: null
+                }
             },
             uploadInfo: {
                 fineName:'',
@@ -83,13 +95,13 @@ export const useTrackStore = defineStore("track", {
             return state.lang.lng
         },
         getVideoInfo(state){
-            return state.video
+            return state.videoInfo
         },
         getUploadInfo(state) {
-            return state.uploadInfo
+            return state.videoInfo.uploadInfo
         },
         getDownloadInfo(state) {
-            return state.downloadInfo
+            return state.videoInfo.downloadInfo
         }
     },
     //定义提交函数
@@ -97,26 +109,37 @@ export const useTrackStore = defineStore("track", {
         updateLang(lang:string){
             this.lang=lang
         },
+        initVideoInfo(video: VideoInfo) {
+            this.videoInfo = Object.assign(video)
+        },
+        initUploadInfo(uploadInfo: UploadInfo) {
+            this.videoInfo.uploadInfo = Object.assign(uploadInfo)
+        },
+        initDownloadInfo(downloadInfo: DownloadInfo) {
+            this.videoInfo.downloadInfo = Object.assign(downloadInfo)
+        },
         updateVideoUpload(video: VideoInfo) {
-            this.video.uploadOSSURL = video.uploadOSSURL
+            this.videoInfo.uploadInfo.uploadOSSURL = video.uploadOSSURL
+            this.videoInfo.id = video.id
         },
         updateDownload(video: VideoInfo) {
-            this.video.downloadOSSURL = video.downloadOSSURL
+            this.videoInfo.downloadInfo.downloadOSSURL = video.downloadOSSURL
         },
         updateUploadInfo(uploadInfo: UploadInfo) {
-            this.uploadInfo.isUpload = uploadInfo.isUpload
+            this.videoInfo.uploadInfo.isUpload = uploadInfo.isUpload
         },
         updateInpainted(uploadInfo: UploadInfo) {
-            this.uploadInfo.isInpainted = uploadInfo.isInpainted
+            this.videoInfo.uploadInfo.isInpainted = uploadInfo.isInpainted
         },
         updateVideoUploadLocalFile(uploadInfo: UploadInfo) {
-            this.uploadInfo.localfile = uploadInfo.localfile
+            this.videoInfo.uploadInfo.localfile = uploadInfo.localfile
         },
         updateVideoUploadOSSURL(uploadInfo: UploadInfo) {
-            this.uploadInfo.uploadOSSURL = uploadInfo.uploadOSSURL
+            this.videoInfo.uploadInfo.uploadOSSURL = uploadInfo.uploadOSSURL
         },
         updateDownloadFile(downloadInfo: DownloadInfo) {
-            this.downloadInfo.downloadOSSURL = downloadInfo.downloadOSSURL
+            this.videoInfo.downloadInfo.downloadOSSURL = downloadInfo.downloadOSSURL
+            this.videoInfo.uploadInfo.isInpainted = downloadInfo.isInpainted
         }
     }
 })

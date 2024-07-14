@@ -76,18 +76,18 @@
 
   const handleUpload = (file) => {
     if(localStorage.getItem('userInfo')){
-    const isVideo = file.type.startsWith('video/');
-    if (!isVideo) {
-      ElMessage.error('Please upload the video file!');
-      return
+      const isVideo = file.type.startsWith('video/');
+      if (!isVideo) {
+        ElMessage.error('Please upload the video file!');
+        return
+      }
+      trackStore.updateVideoUploadLocalFile({
+        localfile: URL.createObjectURL(file)
+      })
+      console.log(file)
+    }else{
+      router.push({name:'Login'})
     }
-    trackStore.updateVideoUploadLocalFile({
-      localfile: URL.createObjectURL(file)
-    })
-    console.log(file)
-  }else{
-    router.push({name:'Login'})
-  }
   }
 
   const handleVideoChange = (file)=>{
@@ -97,16 +97,34 @@
     client.put(fileName, files).then(res => {     
       const oss_path = res.url
       // 上传成功之后，转换真实的地址
-      signatureUrl(fileName).then( res => { 
+      signatureUrl(fileName).then( resfile => { 
         const userInfo = localStorage.getItem('userInfo')?JSON.parse(localStorage.getItem('userInfo')):'';
         uploadVideo({
           name:fileName,
           oss_path:oss_path
-        },userInfo.username).then(res=>{
+        }, userInfo.username).then( resVideo => {
+          if(resVideo && resVideo.id != null ){
+            trackStore.initVideoInfo({
+              name: fileName,
+              uploadInfo: {
+                uploadOSSURL: resVideo.oss_path,
+                fileName: fileName
+              },
+              id: resVideo.id
+            })
+            trackStore.updateUploadInfo({
+              isUpload: true
+            })
+            router.push({
+              name: 'Remove'
+            })
+          } else {
+            ElMessage .error("Upload failed, please try again");
+          }
           if(!res.status === "PENDING") {
             videoInfo.value = JSON.stringify(res)
 		      }else{
-            ElMessage .error("Upload failed, please try again");
+            
           }
           // if(res.status_code === 200) {
 			    //   localStorage.setItem('userInfo',JSON.stringify(res.data))
@@ -114,16 +132,10 @@
 			    //   ElMessage .error(res.detail);
 		      // }
         })
-
-        trackStore.updateVideoUploadOSSURL({
-          uploadOSSURL: res
-        })
-        trackStore.updateUploadInfo({
-          isUpload: true
-        })
-        router.push({
-          name: 'Remove'
-        })
+        // trackStore.updateVideoUploadOSSURL({
+        //   uploadOSSURL: resVideo.oss_path，
+        //   id: resVideo.id
+        // })
       })
     }).catch( err => { 
       ElMessage .error("Upload failed, please try again");
