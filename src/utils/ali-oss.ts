@@ -17,4 +17,14 @@ export const signatureUrl= async (ObjName) => {
       console.log(e)  
     }
 }
+
+// 处理完成之后的文件下载地址
+export const getDownloadUrl = async (ObjName) => {
+  try {
+    let result = await client.signatureUrl(`results/${ObjName}`)
+    return result
+  } catch (e) {
+    console.log(e)
+  }
+ }
  
