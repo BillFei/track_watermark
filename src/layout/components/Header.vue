@@ -115,6 +115,9 @@ const login = () =>{
     font-size: 24px;
     font-weight: 300;
   }
+  .el-menu--horizontal>.el-menu-item.is-active {
+    border-bottom:0px solid blue;
+  }
   .head-menu {
     border-bottom: 0px solid rgba(5,5,5,0.66);
   }

@@ -61,7 +61,7 @@
             </el-button>
           </div>
         </el-col>
-        <el-col :span="12" v-if="trackStore.uploadInfo.isUpload && trackStore.uploadInfo.isInpainted">
+        <el-col :span="12" v-if="trackStore.getUploadInfo.isUpload && trackStore.getUploadInfo.isInpainted">
           <div class="img-card">
             <div class="video-card">
               <video 
@@ -96,7 +96,7 @@
   import { useRouter, Router } from 'vue-router'
   import { storeToRefs } from 'pinia'
   import { useTrackStore } from '@/store/track'
-  import {client,signatureUrl} from '@/utils/ali-oss'
+  import {client,signatureUrl,getDownloadUrl} from '@/utils/ali-oss'
   import { onMounted, ref } from 'vue'
   import {uploadVideo,getVideoOneInfo} from '@/api/video'
 
@@ -125,25 +125,40 @@
     const fileName = `${Date.now()}-${file.name}`;
     videoInfo.value.videoName = fileName
     const files = file.raw
-    client.put(fileName, files).then(res => {     
+    client.put(fileName, files).then(res => {
       const oss_path = res.url
       // 上传成功之后，转换真实的地址
-      signatureUrl(fileName).then( res => { 
+      signatureUrl(fileName).then( resOss => {
         console.log('upload-----',res)
         uploadVideo({
           name:fileName,
           oss_path:oss_path
-        },userInfo.username).then(res=>{
-          console.log('add------------------',res)
-          if(res.status === "PENDING") {
-            console.log("111111111")
-            videoInfo.value.id = res.id
-		      }else{
+        },userInfo.username).then(resVideo=>{
+          // console.log('add------------------',res)
+          // if(res.status === "PENDING") {
+          //   console.log("111111111")
+          //   videoInfo.value.id = res.id
+		      // }else{
+          //   ElMessage .error("Upload failed, please try again");
+          // }
+          if (resVideo && resVideo.id != null) {
+            trackStore.initVideoInfo({
+              name: fileName,
+              uploadInfo: {
+                uploadOSSURL: resVideo.oss_path,
+                fileName: fileName
+              },
+              id: resVideo.id
+            })
+            trackStore.updateUploadInfo({
+              isUpload: true
+            })
+          } else {
             ElMessage .error("Upload failed, please try again");
           }
         })
         trackStore.updateVideoUploadOSSURL({
-          uploadOSSURL: res
+          uploadOSSURL: resOss
         })
         trackStore.updateUploadInfo({
           isUpload: true
@@ -191,33 +206,47 @@
 
   const inpaintClick = () => {
     loadingInstance.value = ElLoading.service({
-      text:'Under repair...'
+      text:'Inpainting'
     }); // 开始加载
     intervalId.value = setInterval(inpainting, 10000);
   }
 
   const inpainting = () =>{
-    const id = videoInfo.value.id
-    getVideoOneInfo(id,userInfo.username).then(res =>{
-      console.log(res)
-      if(res.status === "FINISHED"){
-        loadingInstance.value.close(); // 结束加载
-        clearInterval(intervalId.value);
-        const fileName = videoInfo.value.videoName
-        // const fileName = '1720619595936-aaa.mp4'
-        console.log(fileName)
-        signatureUrl(fileName).then( ress => { 
-          console.log(ress)
-          trackStore.updateInpainted({
-            isInpainted: true
+    const videoInfo = trackStore.getVideoInfo
+    const id = videoInfo.id
+    if (id != null && id != '') {
+      getVideoOneInfo(id,userInfo.username).then(res =>{
+        console.log(res)
+        if(res.status === "FINISHED"){
+          loadingInstance.value.close(); // 结束加载
+          clearInterval(intervalId.value);
+          const fileName = videoInfo.name
+          // const fileName = '1720619595936-aaa.mp4'
+          getDownloadUrl(fileName).then( ress => {
+            // const dowloadUrl = 'http://watermask.oss-cn-shanghai.aliyuncs.com/1720964826177-aaab.mp4'
+            const downloadUrl = ress
+            trackStore.initDownloadInfo({
+              downloadOSSURL: downloadUrl,
+              fileName: videoInfo.name
+            })
+            trackStore.updateDownloadFile({
+              isInpainted: true,
+              downloadOSSURL: downloadUrl
+            })
           })
-          downloadUrl.value = ress
-          trackStore.updateDownloadFile({
-            downloadOSSURL: ress
-          })
-        })
-      }
-    })
+
+          // signatureUrl(fileName).then( ress => { 
+          //   console.log(ress)
+            
+          // })
+        }
+      })
+    } else {
+      loadingInstance.value.close();
+      clearInterval(intervalId.value);
+      ElMessage.error('Please sign in first!');
+      router.push({name:'Login'})
+    }
   }
 
   //下载视频
