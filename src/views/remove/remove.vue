@@ -40,6 +40,7 @@
           <div class="img-card">
             <div class="video-card">
               <video 
+                ref="uploadPlayer"
                 preload="auto" 
                 class="video-play" 
                 poster="#" 
@@ -72,7 +73,9 @@
                 playsinline="true"
                 fluid="true"
                 controls="true"
-                :src="trackStore.getDownloadInfo.downloadOSSURL"></video>
+                :src="trackStore.getDownloadInfo.downloadOSSURL"
+                >
+                </video>
             </div>
             <el-button
                   text
@@ -97,24 +100,15 @@
   import { storeToRefs } from 'pinia'
   import { useTrackStore } from '@/store/track'
   import {client,signatureUrl,getDownloadUrl} from '@/utils/ali-oss'
+  import { genUploadFileName } from '@/utils/methods'
   import { onMounted, ref } from 'vue'
   import {uploadVideo,getVideoOneInfo} from '@/api/video'
 
   const router=useRouter()
 
   const trackStore = useTrackStore()
-  const uploadVideoOssAddress = ref('')
-  const isUpload = ref(false)
-  const videoInfo = ref({
-    id:'',
-    videoName:''
-  });
-  const downloadUrl = ref('')
+  
   const userInfo = localStorage.getItem('userInfo')?JSON.parse(localStorage.getItem('userInfo')):'';
-  console.log(userInfo)
-  onMounted(()=>{
-    // console.log(client)
-  })
 
   const handleSucess = (file) => {
     console.log('上传成功，文件名：',file.name)
@@ -122,51 +116,42 @@
 
   const handleVideoChange = (file)=>{
     if(userInfo){
-    const fileName = `${Date.now()}-${file.name}`;
-    videoInfo.value.videoName = fileName
-    const files = file.raw
-    client.put(fileName, files).then(res => {
-      const oss_path = res.url
-      // 上传成功之后，转换真实的地址
-      signatureUrl(fileName).then( resOss => {
-        console.log('upload-----',res)
-        uploadVideo({
-          name:fileName,
-          oss_path:oss_path
-        },userInfo.username).then(resVideo=>{
-          // console.log('add------------------',res)
-          // if(res.status === "PENDING") {
-          //   console.log("111111111")
-          //   videoInfo.value.id = res.id
-		      // }else{
-          //   ElMessage .error("Upload failed, please try again");
-          // }
-          if (resVideo && resVideo.id != null) {
-            trackStore.initVideoInfo({
-              name: fileName,
-              uploadInfo: {
-                uploadOSSURL: resVideo.oss_path,
-                fileName: fileName
-              },
-              id: resVideo.id
-            })
-            trackStore.updateUploadInfo({
-              isUpload: true
-            })
-          } else {
-            ElMessage .error("Upload failed, please try again");
-          }
+      const fileName = genUploadFileName(file.name)
+      client.put(fileName, files).then(res => {
+        const oss_path = res.url
+        // 上传成功之后，转换真实的地址
+        signatureUrl(fileName).then( resOss => {
+          console.log('upload-----',res)
+          uploadVideo({
+            name:fileName,
+            oss_path:oss_path
+          },userInfo.username).then(resVideo=>{
+            if (resVideo && resVideo.id != null) {
+              trackStore.initVideoInfo({
+                name: fileName,
+                uploadInfo: {
+                  uploadOSSURL: resVideo.oss_path,
+                  fileName: fileName
+                },
+                id: resVideo.id
+              })
+              trackStore.updateUploadInfo({
+                isUpload: true
+              })
+            } else {
+              ElMessage .error("Upload failed, please try again");
+            }
+          })
+          trackStore.updateVideoUploadOSSURL({
+            uploadOSSURL: resOss
+          })
+          trackStore.updateUploadInfo({
+            isUpload: true
+          })
         })
-        trackStore.updateVideoUploadOSSURL({
-          uploadOSSURL: resOss
-        })
-        trackStore.updateUploadInfo({
-          isUpload: true
-        })
+      }).catch( err => { 
+        console.log('上传失败',err)
       })
-    }).catch( err => { 
-      console.log('上传失败',err)
-    })
     }else{
         router.push({name:'Login'})
     }
@@ -220,25 +205,15 @@
         if(res.status === "FINISHED"){
           loadingInstance.value.close(); // 结束加载
           clearInterval(intervalId.value);
-          const fileName = videoInfo.name
-          // const fileName = '1720619595936-aaa.mp4'
-          getDownloadUrl(fileName).then( ress => {
-            // const dowloadUrl = 'http://watermask.oss-cn-shanghai.aliyuncs.com/1720964826177-aaab.mp4'
-            const downloadUrl = ress
-            trackStore.initDownloadInfo({
-              downloadOSSURL: downloadUrl,
-              fileName: videoInfo.name
-            })
-            trackStore.updateDownloadFile({
-              isInpainted: true,
-              downloadOSSURL: downloadUrl
-            })
+          const downloadUrlTmp = res.oss_download_path
+          trackStore.initDownloadInfo({
+            downloadOSSURL: downloadUrlTmp,
+            fileName: videoInfo.name
           })
-
-          // signatureUrl(fileName).then( ress => { 
-          //   console.log(ress)
-            
-          // })
+          trackStore.updateDownloadFile({
+            isInpainted: true,
+            downloadOSSURL: downloadUrlTmp
+          })
         }
       })
     } else {
@@ -251,9 +226,11 @@
 
   //下载视频
   const InpaiintOkViideo = () =>{
+    const downloadInfoTmp = trackStore.getDownloadInfo
     const link = document.createElement('a');
-    link.href = downloadUrl.value ; // 设置视频链接为href属性
-    link.download = 'Repaired_video.mp4'; // 设置下载时的文件名
+    console.log()
+    link.href = downloadInfoTmp.downloadOSSURL ; // 设置视频链接为href属性
+    //link.download = 'Repaired_video.mp4'; // 设置下载时的文件名
 
     // 模拟点击事件以触发下载
     document.body.appendChild(link);

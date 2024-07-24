@@ -125,6 +125,9 @@ import axios from 'axios';
 import FB from 'fb';
 import OAuth2 from 'vue-google-oauth2';
 import { googleLogout,googleAuthCodeLogin,googleSdkLoaded    } from "vue3-google-login"
+import { useUserStore } from '@/store/user'
+
+const userInfo = useUserStore()
 
 //退出谷歌登录
 const yourLogoutFunction = ()=> {
@@ -172,10 +175,10 @@ const checkSubscription = (sb)=>{
 }
 
 const formInfo = reactive({
-userName: '',
-password: '',
-captcha_code: '',
-captcha_id:''
+  userName: '',
+  password: '',
+  captcha_code: '',
+  captcha_id:''
 })
 
 //登录信息
@@ -350,7 +353,7 @@ const signUp = ()=>{
           ElMessage .success('login successfully');
           localStorage.setItem('token', res.access_token)
           setTimeout(function(){
-            window.location.href="http://localhost:3000/#/home"
+            Router.push({"name": "Home"})
           },1000)
         }else{
           ElMessage .error('The account or password is incorrect');
