@@ -1,11 +1,21 @@
 import { defineStore } from 'pinia';
+import {UserProfile, UserInfo} from '@/store/interface'
+
 export const useUserStore = defineStore("user",{
     //定义状态
     state: () =>{
         return {
             userInfo:{
+                userId: 0,
                 name:'',
-                is_admin:'',//0 为普通用户，1 为管理员
+                phone:'',//0 为普通用户，1 为管理员
+                email: '',
+                type: '',
+                credit: 0,
+                token: '',
+                userProfile: {
+                    userid: 0
+                }
             },
             lang:'en'
         }
@@ -24,7 +34,9 @@ export const useUserStore = defineStore("user",{
     },
     //定义提交函数
     actions:{
-  
+        initUserInfo(userInfo: UserInfo) {
+            this.userInfo = Object.assign({}, userInfo)
+        },
         updateLang(lang:string){
             this.lang=lang
         }

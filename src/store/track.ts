@@ -1,45 +1,11 @@
 import { defineStore } from 'pinia';
+import {UserInfo, VideoInfo, UploadInfo, DownloadInfo, LanguageInfo} from "@/store/interface"
 
 interface State {
     user: UserInfo | null
     video: VideoInfo | null
     lang: LanguageInfo | null
 }
-
-interface UserInfo {
-    name: string
-    phone: string
-    email: string
-    type: string
-    credit: number
-    token: string
-}
-
-interface VideoInfo {
-    id: number | string | null
-    name: string | null
-    uploadInfo: UploadInfo | null
-    downloadInfo: DownloadInfo | null
-}
-
-interface UploadInfo {
-    fileName: string
-    isUpload: boolean
-    isInpainted: boolean
-    uploadOSSURL: string | null
-    localfile: string | Object
-}
-
-interface DownloadInfo {
-    fileName: string
-    needCredit: boolean
-    downloadOSSURL: string | Object | null
-}
-
-interface LanguageInfo {
-    lng: string
-}
-
 
 export const useTrackStore = defineStore("track", {
     //定义状态
@@ -63,13 +29,13 @@ export const useTrackStore = defineStore("track", {
                     fineName:'',
                     isUpload: false,
                     isInpainted: false,
-                    uploadOSSURL: null,
+                    uploadOSSURL: '',
                     localfile: null
                 },
                 downloadInfo: {
                     fileName: '',
                     needCredit: false,
-                    downloadOSSURL: null
+                    downloadOSSURL: ''
                 }
             },
             uploadInfo: {
@@ -138,7 +104,7 @@ export const useTrackStore = defineStore("track", {
             this.videoInfo.uploadInfo.uploadOSSURL = uploadInfo.uploadOSSURL
         },
         updateDownloadFile(downloadInfo: DownloadInfo) {
-            this.videoInfo.downloadInfo.downloadOSSURL = downloadInfo.downloadOSSURL
+            //this.videoInfo.downloadInfo.downloadOSSURL = downloadInfo.downloadOSSURL
             this.videoInfo.uploadInfo.isInpainted = downloadInfo.isInpainted
         }
     }
