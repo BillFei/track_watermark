@@ -381,11 +381,25 @@ const res:any=await getCaptcha()
 //     });
 // })
 
-const googleLogin = ()=>{
+const googleLogin = async ()=>{
 // window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=425522104351-jdajusf5ollgt7ahk1q1pt6o55t8la69.apps.googleusercontent.com&redirect_uri=YOUR_REDIRECT_URI&scope=YOUR_SCOPE&response_type=code'
-googleAuthCodeLogin().then((response) => {
-    console.log("Handle the response", response)
-  })
+  try {
+      const response = await googleAuthCodeLogin();
+      const { code } = response;
+      console.log(code)
+      const res = await fetch(import.meta.env.VITE_BASE_API + 'api/v1/google/callback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await res.json();
+      console.log('Backend response:', data);
+    } catch (error) {
+      console.error('Error during Google login process:', error);
+    }
 }
 const facebookLogin = ()=>{
 // FB.login(response => {
