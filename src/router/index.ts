@@ -31,16 +31,31 @@ export const Routes = [
         //   requireAuth: true,
         // }, 
         
-      },
+      }
     ],
-  },
-  {
+  },{
+    path: "/checkoutPayment",
+    name: "CheckoutPayment",
+    component: () => import("@/views/price/checkoutPayment.vue"),
+    // meta: {
+    //   requireAuth: true,
+    // }, 
+    
+  },{
+    path: "/completionPayment",
+    name: "CompletionPayment",
+    component: () => import("@/views/price/completionPayment.vue"),
+    // meta: {
+    //   requireAuth: true,
+    // }, 
+    
+  },{
     path: "/login",
     name: "Login",
     component: () => import("@/views/login/Login.vue"),
-    meta: {
-      requireAuth: true,
-    }, 
+    // meta: {
+    //   requireAuth: true,
+    // }, 
     
   },
 ];

@@ -35,7 +35,7 @@
                 </el-table>
               </div>
               <el-col style="text-align: center;" :span="24">
-              <el-button size="large" class="right-buy" round>Buy Now</el-button>
+              <el-button size="large" class="right-buy" @click="buyNow" round>Buy Now</el-button>
             </el-col>
             </el-card>
           </el-col>
@@ -96,7 +96,8 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
   import { ElTable } from 'element-plus'
-  import { method } from 'lodash';
+  import { useRouter } from 'vue-router'
+  const router=useRouter()
 
   const checkRadio1 = ref(1);
   const checkRadio2 = ref(2);
@@ -119,16 +120,24 @@
   },{
     id:4,
     count: '200 Credit',
-    sum: 'US$ 3.5',
+    sum: 'US$ 70',
     price:'US$ 3.5/video'
   },{
     id:5,
     count: '500 Credit',
-    sum: 'US$ 3',
+    sum: 'US$ 120',
     price:'US$ 3/video'
   }] 
 
+  const checkedSetMeal = ref({
+    count:tableData[0].count,
+    sum:tableData[0].sum
+  })
+
+
   function handleRowChange (data,type){
+    checkedSetMeal.value.count = data.count
+    checkedSetMeal.value.sum = data.sum
     console.log(data,type)
     if(type == 1){
       checkRadio1.value = data.id  
@@ -138,13 +147,26 @@
     
   }
 
+  const buyNow = () => {
+    console.log(checkedSetMeal.value.sum)
+    router.push({
+      name:'CheckoutPayment',
+      params:{
+        count: checkedSetMeal.value.count,
+        sum: checkedSetMeal.value.sum
+      }
+    })
+  };
+
+
+
 </script>
 
 <style  lang="scss" scoped>
 .container{
   display: flex;
   justify-content: center;
-  padding-top: 40px;
+  //padding-top: 40px;
   flex-direction: column;
   .card{
     display: flex;
