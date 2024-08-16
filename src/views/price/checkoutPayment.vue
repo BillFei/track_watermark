@@ -46,7 +46,7 @@
   <script setup>
   import { ref , onMounted} from 'vue'
   import { loadStripe } from '@stripe/stripe-js';
-  import {pay} from '@/api/pay'
+  import { pay, stripe_publicSecrect } from '@/api/pay'
   import { ElButton, ElLoading} from 'element-plus';
   import { useRouter } from 'vue-router'
   const router = useRouter()
@@ -55,10 +55,12 @@
 
   const count = router.currentRoute.value.params.count
   const sum = router.currentRoute.value.params.sum
+  const type = router.currentRoute.value.params.type
+  const amount = count.match(/\d+/g)[0]
 
   const info = {
-    payType: "membership",
-    amount: router.currentRoute.value.params.sum.match(/\d+/g)[0]*10
+    payType: type,
+    amount: count.match(/\d+/g)[0]
   }
  // 使用ref创建响应式引用
   const stripe = ref();
@@ -68,19 +70,29 @@
 
   //构建支付组件
   const setupStripe = async () => {
-    stripe.value = await loadStripe('pk_test_51PgdmIAOsIHV5PCILAT77oz47NpEHRl75eJQ0by2t0QOneIFcovmJXpgYiGaEyGxZBT1wPp5IjraPA0nEfPFkX9r00TpPTEeLs');
+    stripe.value = await loadStripe(stripe_publicSecrect);
     pay(info).then(res=>{
-      console.log(res)
-      elements.value = stripe.value.elements({
-        theme: 'stripe',
-        clientSecret: res.clientSecret
-        // locale: 'auto'
-      })
-      const paymentElement = elements.value.create('payment')
-      paymentElement.mount('#payment-element');
-      loading.value = false
-  })
-    
+      try {
+        console.log(res)
+        const payInfo = ref({
+          payType: info.payType,
+          amount: amount,
+          paymentId: res.payment_id,
+          paymentAmount: info.amount
+        })
+        localStorage.setItem('payInfo',JSON.stringify(payInfo))
+        elements.value = stripe.value.elements({
+          theme: 'stripe',
+          clientSecret: res.clientSecret
+          // locale: 'auto'
+        })
+        const paymentElement = elements.value.create('payment')
+        paymentElement.mount('#payment-element');
+        loading.value = false
+      } catch (error) {
+        console.log(error)
+      }
+    })
   };
 
   // 使用onMounted钩子在组件挂载后调用initStripe

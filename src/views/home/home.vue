@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue'
+  import { ref,watch, onMounted } from 'vue'
   import { ElMessageBox, ElMessage } from 'element-plus'
   import { useRouter, Router } from 'vue-router'
   import { storeToRefs } from 'pinia'
@@ -146,17 +146,24 @@
     }
   }
 
-  if(localStorage.getItem("token")){
-    if(!localStorage.getItem('userInfo')){
+  onMounted(() => {
+    if(localStorage.getItem("token")){
       getUserInfo().then(res=>{
         if(res.status_code === 200) {
           localStorage.setItem('userInfo',JSON.stringify(res.data))
+          watch(() => router.path, (newPath) => {
+            console.log("wwwww")
+            // 路由变化时执行刷新逻辑
+            refreshHeader();
+          });
         }else{
           ElMessage .error(res.detail);
         }
       })
     }
-  }
+  });
+
+  
 
   const handleError = (file) => {
     ElMessage.error('Please upload a video file again!');

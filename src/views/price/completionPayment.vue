@@ -6,13 +6,14 @@
           <i class="el-icon-success"></i>
         </div>
         <div class="success-message">
-          <h2>Payment Success</h2>
-          <p>Thank you for your purchase, the order has been paid successfully.</p>
+          <h2>{{ paymentStatus.status }}</h2>
+          <p>{{ paymentStatus.atten }}</p>
         </div>
-        <div class="order-info">
+        <div class="order-info" v-if="orderInfo.id">
           <!-- 订单信息，根据实际订单数据进行展示 -->
-          <p>Order Number：123456789</p>
-          <p>Payment Amount：$100.00</p>
+          <p>Payment Amount：${{ orderInfo.paymentAmount }}</p>
+          <p>Order Types：{{ orderInfo.types }}</p>
+          <p>Order Number：{{ orderInfo.id }}</p>
         </div>
         <div class="action-buttons">
           <!-- 操作按钮，如返回首页或查看订单 -->
@@ -24,9 +25,10 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue';
+  import { ref,onMounted} from 'vue';
   import { ElMessage, ElButton, ElCard } from 'element-plus';
   import { useRouter } from 'vue-router'
+  import { payStatus } from '@/api/pay'
   const router = useRouter()
   console.log(router);
 
@@ -35,12 +37,19 @@
   
   // 模拟订单信息
   const orderInfo = ref({
-    id: '123456789',
-    amount: 100.00,
+    id: '',
+    types: '',
+    paymentAmount:''
   });
+
+  const paymentStatus =  ref({
+    status:'',
+    atten:''
+  })
   
   const goHome = () => {
-    window.location.href = '/'; // 根据实际路由逻辑调整
+    // window.location.href = '/'; // 根据实际路由逻辑调整
+    router.push({name:'Home'})
   };
   
   const viewOrder = () => {
@@ -49,6 +58,38 @@
     // 可以使用ElMessage来显示提示信息
     ElMessage.success('查看订单信息');
   };
+
+  onMounted(() => {
+    console.log(JSON.parse(localStorage.getItem("payInfo")))
+    if(localStorage.getItem("payInfo")){
+      const payInfo = JSON.parse(localStorage.getItem("payInfo"))._value
+      const payInfos = {
+        amount:payInfo.amount,
+        payType:payInfo.payType,
+        paymentId:payInfo.paymentId
+      }
+      console.log(payInfo)
+      payStatus(payInfos,payInfo.payType).then(res=>{
+        if(res.status === "success"){
+          ElMessage .success('Payment successfully');
+          paymentStatus.value.status = 'Payment successfully'
+          paymentStatus.value.atten = 'Thank you for your purchase, the order has been paid successfully.'
+          orderInfo.value.id = payInfo.paymentId
+          orderInfo.value.paymentAmount = payInfo.paymentAmount/100
+          if(payInfo.payType == "membership"){
+            orderInfo.value.types = payInfo.amount +" Month Membership"
+          }else{
+            orderInfo.value.types = payInfo.amount +" Credits"
+          }
+        }else{
+          ElMessage .success('Payment failed');
+          paymentStatus.value.status = 'Payment failed',
+          paymentStatus.value.atten = 'Payment failed, please contact customer service'
+        }
+      })
+    }
+  });
+
   </script>
   
   <style scoped>

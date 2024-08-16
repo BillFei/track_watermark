@@ -50,7 +50,7 @@
                     <span style="font-size: 18px; display: inline-block; vertical-align: middle; margin-left: 5px; margin-top: 4px;">/ image</span>
                   </div>
                 </div>
-                <el-table :data="tableData" class="plans-tabs" style="margin: 0px auto 20px;width: 100%">
+                <el-table :data="tableData1" class="plans-tabs" style="margin: 0px auto 20px;width: 100%">
                   <el-table-column width="50px" label="">
                     <template v-slot="scope">
                       <!-- label值要与el-table数据id实现绑定 -->
@@ -63,7 +63,7 @@
                 </el-table>
               </div>
               <el-col style="text-align: center;" :span="24">
-              <el-button size="large" class="right-buy sub" round>Subscribe now</el-button>
+              <el-button size="large" class="right-buy sub" @click="buyNow" round>Subscribe now</el-button>
             </el-col>
             </el-card>
           </el-col>
@@ -129,9 +129,37 @@
     price:'US$ 3/video'
   }] 
 
+  const tableData1 = [{
+    id:1,
+    count: '1 Month',
+    sum: 'US$ 20',
+    price:'US$ 0.001/video'
+  },{
+    id:2,
+    count: '2 Month',
+    sum: 'US$ 38',
+    price:'US$ 0.001/video'
+  },{
+    id:3,
+    count: '3 Month',
+    sum: 'US$ 55',
+    price:'US$ 0.001/video'
+  },{
+    id:4,
+    count: '5 Month',
+    sum: 'US$ 100',
+    price:'US$ 0.001/video'
+  },{
+    id:5,
+    count: '12 Month',
+    sum: 'US$ 200',
+    price:'US$ 0.001/video'
+  }]
+
   const checkedSetMeal = ref({
     count:tableData[0].count,
-    sum:tableData[0].sum
+    sum:tableData[0].sum,
+    type:"credits"
   })
 
 
@@ -141,19 +169,22 @@
     console.log(data,type)
     if(type == 1){
       checkRadio1.value = data.id  
+      checkedSetMeal.value.type = "credits"
     }else{
       checkRadio2.value = data.id
+      checkedSetMeal.value.type = "membership"
     }
     
   }
 
   const buyNow = () => {
-    console.log(checkedSetMeal.value.sum)
+    console.log(checkedSetMeal.value)
     router.push({
       name:'CheckoutPayment',
       params:{
         count: checkedSetMeal.value.count,
-        sum: checkedSetMeal.value.sum
+        sum: checkedSetMeal.value.sum,
+        type: checkedSetMeal.value.type
       }
     })
   };

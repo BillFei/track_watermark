@@ -192,8 +192,8 @@ const registerForm = reactive({
   username:'',
   password:'',
   PasswordCf:'',
-  email:'',
-  phone_number:''
+  email:null,
+  phone_number:null
 })
 
 //登录提示
@@ -257,7 +257,8 @@ const goLogin = () =>{
       ElMessage .success('login successfully');
       localStorage.setItem('token', res.access_token)
 				setTimeout(function(){
-					window.location.href="http://localhost:3000/#/home"
+					// window.location.href="http://localhost:3000/#/home"
+          Router.push({"name": "Home"})
 				},1000)
 		}else{
 			ElMessage .error('The account or password is incorrect');
@@ -394,9 +395,13 @@ const googleLogin = async ()=>{
         },
         body: JSON.stringify({ code }),
       });
-
       const data = await res.json();
       console.log('Backend response:', data);
+      ElMessage .success('login successfully');
+      localStorage.setItem('token', data.access_token)
+      setTimeout(function(){
+        Router.push({"name": "Home"})
+      },1000)
     } catch (error) {
       console.error('Error during Google login process:', error);
     }
