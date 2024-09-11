@@ -10,9 +10,10 @@
           <p>{{ paymentStatus.atten }}</p>
         </div>
         <div class="order-info" v-if="orderInfo.id">
-          <!-- 订单信息，根据实际订单数据进行展示 -->
+          <!-- 订单信息，根据实际订单数据进行展示 --> 
           <p>Payment Amount：${{ orderInfo.paymentAmount }}</p>
           <p>Order Types：{{ orderInfo.types }}</p>
+          <p>Order Count：{{ orderInfo.sum }}</p>
           <p>Order Number：{{ orderInfo.id }}</p>
         </div>
         <div class="action-buttons">
@@ -28,7 +29,8 @@
   import { ref,onMounted} from 'vue';
   import { ElMessage, ElButton, ElCard } from 'element-plus';
   import { useRouter } from 'vue-router'
-  import { payStatus } from '@/api/pay'
+  import { payStatus,payCallBack } from '@/api/pay'
+  import { getUserInfo } from '@/api/login'
   const router = useRouter()
   console.log(router);
 
@@ -39,7 +41,8 @@
   const orderInfo = ref({
     id: '',
     types: '',
-    paymentAmount:''
+    paymentAmount:'',
+    sum:''
   });
 
   const paymentStatus =  ref({
@@ -66,29 +69,45 @@
       const payInfos = {
         amount:payInfo.amount,
         payType:payInfo.payType,
-        paymentId:payInfo.paymentId
+        paymentId:payInfo.paymentId,
       }
       console.log(payInfo)
-      payStatus(payInfos,payInfo.payType).then(res=>{
+      payCallBack(payInfos).then(res=>{
         if(res.status === "success"){
           ElMessage .success('Payment successfully');
           paymentStatus.value.status = 'Payment successfully'
           paymentStatus.value.atten = 'Thank you for your purchase, the order has been paid successfully.'
           orderInfo.value.id = payInfo.paymentId
-          orderInfo.value.paymentAmount = payInfo.paymentAmount/100
-          if(payInfo.payType == "membership"){
-            orderInfo.value.types = payInfo.amount +" Month Membership"
-          }else{
-            orderInfo.value.types = payInfo.amount +" Credits"
-          }
+          orderInfo.value.paymentAmount = payInfo.paymentAmount
+          orderInfo.value.types = payInfo.payType
+          orderInfo.value.sum = payInfo.sum
+          update_userInfo();
+          localStorage.removeItem("payInfo")
         }else{
           ElMessage .success('Payment failed');
           paymentStatus.value.status = 'Payment failed',
           paymentStatus.value.atten = 'Payment failed, please contact customer service'
         }
+      }).catch({
+        
       })
+    }else{ 
+      router.push({name:'Home'})
     }
   });
+
+  //更新本地用户信息
+  const update_userInfo = () =>{
+    if(localStorage.getItem("token")){
+      getUserInfo().then(res=>{
+        if(res.status_code === 200) {
+          localStorage.setItem('userInfo',JSON.stringify(res.data))
+        }
+      }).catch(error =>{
+        ElMessage.error(error);
+      })
+    }
+  }
 
   </script>
   

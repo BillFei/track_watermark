@@ -16,6 +16,7 @@
                 :on-preview="handlePreview"
                 :on-change="handleVideoChange"
                 :before-upload="beforeUpload"
+                :show-file-list="false"
                 :auto-upload="false"
                 accept="video/*"
                 multiple
@@ -92,6 +93,17 @@
       </el-row>
     </div>
   </div>
+  <el-dialog v-model="theTips.show" title="Tips" width="500px" center>
+    <span>{{ theTips.attention }}</span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="toMembership(false)">Cancel</el-button>
+        <el-button type="primary" @click="toMembership(true)">
+          Confirm
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -106,6 +118,11 @@
 
   const router=useRouter()
 
+  const theTips = ref({
+    show:false,
+    attention:''
+  })
+
   const trackStore = useTrackStore()
   
   const userInfo = localStorage.getItem('userInfo')?JSON.parse(localStorage.getItem('userInfo')):'';
@@ -114,52 +131,131 @@
     console.log('上传成功，文件名：',file.name)
   }
 
-  const handleVideoChange = (file)=>{
-    if(userInfo){
-      const fileName = genUploadFileName(file.name)
-      client.put(fileName, files).then(res => {
-        const oss_path = res.url
-        // 上传成功之后，转换真实的地址
-        signatureUrl(fileName).then( resOss => {
-          console.log('upload-----',res)
-          uploadVideo({
-            name:fileName,
-            oss_path:oss_path
-          },userInfo.username).then(resVideo=>{
-            if (resVideo && resVideo.id != null) {
-              trackStore.initVideoInfo({
-                name: fileName,
-                uploadInfo: {
-                  uploadOSSURL: resVideo.oss_path,
-                  fileName: fileName
-                },
-                id: resVideo.id
-              })
-              trackStore.updateUploadInfo({
-                isUpload: true
-              })
-            } else {
-              ElMessage .error("Upload failed, please try again");
-            }
-          })
-          trackStore.updateVideoUploadOSSURL({
-            uploadOSSURL: resOss
-          })
-          trackStore.updateUploadInfo({
-            isUpload: true
-          })
-        })
-      }).catch( err => { 
-        console.log('上传失败',err)
-      })
+  const toMembership = (type) =>{
+    // console.log(type)
+    if(type){
+      theTips.value.show = false
+      router.push({name:'Price'})
     }else{
-        router.push({name:'Login'})
+      theTips.value.show = false
     }
   }
 
+  const handleVideoChange = (file)=>{
+    if(userInfo){
+     checkMediaFile(file.raw)
+    }
+  }
+
+  //读取提示
+  const loadingVideo  = ref(null);
+  const windows: any = window
+  //获取视频详细信息
+  const checkMediaFile = (file: any): Promise<any> => {
+    loadingVideo.value = ElLoading.service({
+        text:'Reading...'
+    }); // 开始加载
+    return new Promise((r, j) => {
+      const getSize = () => file.size
+      const readChunk = (chunkSize, offset) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = (event: any) => {
+            if (event.target.error) {
+              reject(event.target.error)
+            }
+            resolve(new Uint8Array(event.target.result))
+          }
+          reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize))
+        })
+      windows.MediaInfo().then((media) => {
+          media.analyzeData(getSize, readChunk).then((result) => {
+            console.log('视频信息：',result.media.track[1]);
+            loadingVideo.value.close(); // 结束加载
+            uploadVideoToOss(result,file);
+            return result
+          }).catch((error) => {
+            j(error)
+          })
+      }).catch((error) => {
+        j(error)
+      })
+    })
+  }
+
+  //视频上传前期检验
+  const uploadVideoToOss = (videoInfo,file) =>{
+    console.log(videoInfo,file)
+    const vinfo = videoInfo.media.track[1]
+    const video_credits = vinfo.FrameCount / 15;
+    console.log(video_credits)
+    if(userInfo.role === "NORMALMEMBER"){
+      if(vinfo.Duration > 60){
+        //提示充值
+        theTips.value.show = true
+        theTips.value.attention = 'This function needs to open a membership, confirm to open a member?'
+      }else{  
+        //上传视频
+        toUploadVideo(file);
+      }
+    }else{
+      const user_credis = userInfo.credits;
+      const video_credits = vinfo.FrameCount / 15;
+      if(video_credits <= user_credis){
+        toUploadVideo(file);
+      }else{
+        theTips.value.show = true
+        theTips.value.attention = 'Insufficient credits, are you to buy?'
+      }
+    }
+  }
+
+  //上传视频到oss
+  const toUploadVideo = (file) =>{
+    const fileName = genUploadFileName(file.name)
+    console.log(file)
+    client.put(fileName, file).then(res => {
+      const oss_path = res.url
+      // 上传成功之后，转换真实的地址
+      signatureUrl(fileName).then( resOss => {
+        console.log('upload-----',res)
+        uploadVideo({
+          name:fileName,
+          oss_path:oss_path
+        },userInfo.username).then(resVideo=>{
+          if (resVideo && resVideo.id != null) {
+            trackStore.initVideoInfo({
+              name: fileName,
+              uploadInfo: {
+                uploadOSSURL: resVideo.oss_path,
+                fileName: fileName
+              },
+              id: resVideo.id
+            })
+            trackStore.updateUploadInfo({
+              isUpload: true
+            })
+          } else {
+            ElMessage .error("Upload failed, please try again");
+          }
+        })
+        trackStore.updateVideoUploadOSSURL({
+          uploadOSSURL: resOss
+        })
+        trackStore.updateUploadInfo({
+          isUpload: true
+        })
+      })
+    }).catch( err => { 
+      console.log('上传失败',err)
+    })
+  }
+
   const beforeUpload = (file) => {
+    console.log(userInfo,file)
     if(userInfo){
     // 可以在这里进行文件类型和大小的校验
+      console.log(file);
       const isVideo = file.type.startsWith('video/');
       if (!isVideo) {
         ElMessage.error('Please upload the video file!');

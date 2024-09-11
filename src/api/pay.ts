@@ -20,3 +20,13 @@ export const payStatus = (data: object,payType: string) =>{
     data,
   });
 }
+
+
+//支付校验
+export const payCallBack = (data: object) =>{
+  return request({
+    url: "/v1/user/pay/callback",
+    method: "POST",
+    data,
+  });
+}

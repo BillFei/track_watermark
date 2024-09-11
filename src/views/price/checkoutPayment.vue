@@ -11,8 +11,8 @@
                 </div>
                 <h1 style="font-size: 1.4rem;font-weight: bold;">Credit package</h1>
                 <div style="font-size: 1.3rem;display: ruby-text;padding: 10px 0 10px 0;">
-                    <span style="float: left;">{{ count }}</span>
-                    <span style="float: right;">{{ sum }}</span>
+                    <span style="float: left;">{{ sum }}</span>
+                    <!-- <span style="float: right;">{{ sum }}</span> -->
                 </div>
                 <!-- <div style="font-size: 1.3rem;display: ruby-text;padding: 10px 0 10px 0;">
                     <span style="float: left;">Sales tax</span>
@@ -21,9 +21,10 @@
                 <div class="flex-grow-1">
                     <hr style="border: 0;border-top:1px solid rgba(0, 0, 0, 0.1);box-sizing:content-box;height: 0;overflow: visible;width:100%;">
                 </div>
+                <h1 style="font-size: 1.4rem;font-weight: bold;">Total</h1>
                 <div style="font-size: 1.8rem;font-weight: bold;display: ruby-text;padding: 10px 0 10px 0;">
-                    <span style="float: left;">Total</span> 
-                    <span style="float: right;">{{ sum }}</span>
+                    <!-- <span style="float: left;">Total&nbsp;&nbsp;</span>  -->
+                    <span style="float: right;">{{ price }}</span>
                 </div>
             </div>
             <div class="flex-grow-1">
@@ -53,14 +54,14 @@
   console.log(router)
   console.log(router.currentRoute.value.params)
 
-  const count = router.currentRoute.value.params.count
   const sum = router.currentRoute.value.params.sum
   const type = router.currentRoute.value.params.type
-  const amount = count.match(/\d+/g)[0]
+  const price = router.currentRoute.value.params.price
+  const amount = 1
 
   const info = {
     payType: type,
-    amount: count.match(/\d+/g)[0]
+    amount: 1
   }
  // 使用ref创建响应式引用
   const stripe = ref();
@@ -78,7 +79,8 @@
           payType: info.payType,
           amount: amount,
           paymentId: res.payment_id,
-          paymentAmount: info.amount
+          paymentAmount: price,
+          sum:sum
         })
         localStorage.setItem('payInfo',JSON.stringify(payInfo))
         elements.value = stripe.value.elements({

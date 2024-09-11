@@ -8,10 +8,11 @@
         </p>
       </div>
     </section>
-    <div style="display: inline-flex;width: 100%;justify-content: center;">
+    <!-- <div style="display: inline-flex;width: 100%;justify-content: center;"> -->
+      <div style="width: 100%;justify-content: center;">
       <div class="pricing-overview">
         <el-row justify="center" class="pricing-row">
-          <el-col :span="8" class="el-co-8">
+          <!-- <el-col :span="8" class="el-co-8">
             <el-card class="upper" style="width:100%;">
               <h2 style="text-align: center;">goPay as you </h2>
               <div>
@@ -25,7 +26,7 @@
                 <el-table :data="tableData" class="plans-tabs" style="margin: 0px auto 20px;width: 100%">
                   <el-table-column width="50px" label="">
                     <template v-slot="scope"> 
-                      <!-- label值要与el-table数据id实现绑定 -->
+                      label值要与el-table数据id实现绑定
                       <el-radio v-model="checkRadio1" :label="scope.row.id" @change="handleRowChange(scope.row,1)">{{""}}</el-radio>
                     </template>
                   </el-table-column>
@@ -38,28 +39,28 @@
               <el-button size="large" class="right-buy" @click="buyNow" round>Buy Now</el-button>
             </el-col>
             </el-card>
-          </el-col>
+          </el-col> -->
           <el-col :span="8" class="el-co-8-1">
             <el-card class="upper" style="width:100%;">
               <h2 style="font-size: 2rem;text-align: center;">Subscription Plan</h2>
               <div>
                 <div>
                   <div style="text-align: center; color: rgb(15, 112, 230); line-height: 1; margin-bottom: 15px;">
-                    <span class="h3" style="font-size: 3rem;font-weight: 400;display: inline-block;vertical-align: middle;">US
-                    $ 3</span>
-                    <span style="font-size: 18px; display: inline-block; vertical-align: middle; margin-left: 5px; margin-top: 4px;">/ image</span>
+                    <span class="h3" style="font-size: 24px;font-weight: 400;display: inline-block;vertical-align: middle;">5S</span>
+                    <span style="font-size: 18px; display: inline-block; vertical-align: middle; margin-left: 5px; margin-top: 4px;">/ Credit</span>
                   </div>
                 </div>
-                <el-table :data="tableData1" class="plans-tabs" style="margin: 0px auto 20px;width: 100%">
+                <el-table :data="tableData1" class="plans-tabs" style="margin: 0px auto 20px;width: 100%;text-align: center;">
                   <el-table-column width="50px" label="">
                     <template v-slot="scope">
                       <!-- label值要与el-table数据id实现绑定 -->
-                      <el-radio v-model="checkRadio2" :label="scope.row.id" @change="handleRowChange(scope.row,2)">{{""}}</el-radio>
+                      <el-radio v-model="checkRadio2" :label="scope.row.id" @change="handleRowChange(scope.row)">{{""}}</el-radio>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="count" label="Count"/>
-                  <el-table-column prop="sum" label="Sum" />
+                  <el-table-column prop="membership_type" label="Membership Type"/>
                   <el-table-column prop="price" label="Price"/>
+                  <el-table-column prop="sum" label="Sum" /> 
+                  <el-table-column prop="count" label="Count"/>
                 </el-table>
               </div>
               <el-col style="text-align: center;" :span="24">
@@ -67,7 +68,7 @@
             </el-col>
             </el-card>
           </el-col>
-          <el-col :span="8" class="el-co-8">
+          <!-- <el-col :span="8" class="el-co-8">
             <el-card class="upper" style="width:100%;">
               <h2 style="text-align: center;">High-Volume Solutions </h2>
               <div>
@@ -85,7 +86,7 @@
                     <el-button size="large" class="right-buy" round>Contact us</el-button>
               </el-col>
             </el-card>
-          </el-col>
+          </el-col> -->
         </el-row>
       </div>
       <div class="text-center"></div>
@@ -95,97 +96,101 @@
 
 <script lang="ts" setup>
   import { ref } from 'vue'
-  import { ElTable } from 'element-plus'
+  import { ElTable , ElLoading} from 'element-plus'
   import { useRouter } from 'vue-router'
   const router=useRouter()
 
-  const checkRadio1 = ref(1);
-  const checkRadio2 = ref(2);
+  // const checkRadio1 = ref(1);
+  const checkRadio2 = ref(1);
 
-  const tableData = [{
-    id:1,
-    count: '1 Credit',
-    sum: 'US$ 5',
-    price:'US$ 5/video'
-  },{
-    id:2,
-    count: '10 Credit',
-    sum: 'US$ 49',
-    price:'US$ 4.9/video'
-  },{
-    id:3,
-    count: '100 Credit',
-    sum: 'US$ 40',
-    price:'US$ 4/video'
-  },{
-    id:4,
-    count: '200 Credit',
-    sum: 'US$ 70',
-    price:'US$ 3.5/video'
-  },{
-    id:5,
-    count: '500 Credit',
-    sum: 'US$ 120',
-    price:'US$ 3/video'
-  }] 
+  // const tableData = [{
+  //   id:1,
+  //   count: '1 Credit',
+  //   sum: 'US$ 5',
+  //   price:'US$ 5/video'
+  // },{
+  //   id:2,
+  //   count: '10 Credit',
+  //   sum: 'US$ 49',
+  //   price:'US$ 4.9/video'
+  // },{
+  //   id:3,
+  //   count: '100 Credit',
+  //   sum: 'US$ 40',
+  //   price:'US$ 4/video'
+  // },{
+  //   id:4,
+  //   count: '200 Credit',
+  //   sum: 'US$ 70',
+  //   price:'US$ 3.5/video'
+  // },{
+  //   id:5,
+  //   count: '500 Credit',
+  //   sum: 'US$ 120',
+  //   price:'US$ 3/video'
+  // }] 
 
   const tableData1 = [{
     id:1,
-    count: '1 Month',
-    sum: 'US$ 20',
-    price:'US$ 0.001/video'
+    membership_type:'7 Days',
+    price:'US$ 9.9',
+    sum: '720 Credits / 60 minutes',
+    count: '5S/Credit',
+    ptype:'SEVEN_DAYS',
+    price_number:'9.9'
   },{
     id:2,
-    count: '2 Month',
-    sum: 'US$ 38',
-    price:'US$ 0.001/video'
+    membership_type:'14 Days',
+    price:'US$ 19.9',
+    sum: '1440 Credits / 120 minutes',
+    count: '5S/Credit',
+    ptype:'FOURTEEN_DAYS',
+    price_number:'19.9'
   },{
     id:3,
-    count: '3 Month',
-    sum: 'US$ 55',
-    price:'US$ 0.001/video'
-  },{
-    id:4,
-    count: '5 Month',
-    sum: 'US$ 100',
-    price:'US$ 0.001/video'
-  },{
-    id:5,
-    count: '12 Month',
-    sum: 'US$ 200',
-    price:'US$ 0.001/video'
+    membership_type:'30 Days',
+    price:'US$ 49.9',
+    sum: '3600 Credis / 300 minutes',
+    count: '5S/Credit',
+    ptype:'THIRTY_DAYS',
+    price_number:'49.9'
   }]
 
   const checkedSetMeal = ref({
-    count:tableData[0].count,
-    sum:tableData[0].sum,
-    type:"credits"
+    count:tableData1[0].count,
+    price:tableData1[0].price,
+    sum:tableData1[0].sum,
+    type:"SEVEN_DAYS"
   })
 
 
-  function handleRowChange (data,type){
+  function handleRowChange (data){
     checkedSetMeal.value.count = data.count
+    checkedSetMeal.value.price = data.price
     checkedSetMeal.value.sum = data.sum
-    console.log(data,type)
-    if(type == 1){
-      checkRadio1.value = data.id  
-      checkedSetMeal.value.type = "credits"
-    }else{
+    console.log(data)
       checkRadio2.value = data.id
-      checkedSetMeal.value.type = "membership"
-    }
-    
+      // checkedSetMeal.value.type = "membership"
+      checkedSetMeal.value.type = data.ptype
   }
-
+  
+  const buyNowPay = ref(null)
   const buyNow = () => {
+    buyNowPay.value = ElLoading.service({
+      text:'loading...'
+    }); // 开始加载
     console.log(checkedSetMeal.value)
     router.push({
       name:'CheckoutPayment',
       params:{
-        count: checkedSetMeal.value.count,
+        // count: checkedSetMeal.value.count,
         sum: checkedSetMeal.value.sum,
-        type: checkedSetMeal.value.type
+        type: checkedSetMeal.value.type,
+        price:checkedSetMeal.value.price,
       }
+    }).then(res=>{
+      buyNowPay.value.close()
+      console.log('---------------------',res)
     })
   };
 

@@ -144,7 +144,7 @@ export default defineComponent({
  .logo_img{
   width: 60px;
   height: 30px ;
-    background: url('@/assets/images/preoject_logo.png') no-repeat center;
+    // background: url('@/assets/images/preoject_logo.png') no-repeat center;
  }
 .logo_title{
   width: 100%;

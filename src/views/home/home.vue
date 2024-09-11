@@ -160,6 +160,8 @@
           ElMessage .error(res.detail);
         }
       })
+    }else{
+      router.push({name:'Login'})
     }
   });
 
