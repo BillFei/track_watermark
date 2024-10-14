@@ -25,6 +25,15 @@ export const login = (data: object) => {
   });
 };
 
+//谷歌登录
+export const google_login = (data: object) => {
+  return request({
+    url: "/v1/google/callback",
+    method: "POST",
+    data,
+  });
+};
+
 //注册
 export const register = (data: object) =>{
   return request({
@@ -39,6 +48,9 @@ export const getUserInfo = (data: object) =>{
   return request({
     url: "/v1/user/me/",
     method: "GET",
+    // headers: {
+    //   Authorization: `Bearer ${localStorage.getItem('token')}`
+    // },
     data,
   });
 }

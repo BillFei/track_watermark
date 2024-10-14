@@ -3,7 +3,7 @@ import { ElMessage,ElLoading } from 'element-plus'
 //创建axios实例
 const request = axios.create({
     // 服务接口请求
-    baseURL:import.meta.env.VITE_BASE_API+'api',
+    baseURL:'/api',
     // 超时设置
     timeout: 30000,
     headers:{
@@ -14,6 +14,7 @@ const request = axios.create({
 const loading:any=null
 request.interceptors.request.use(
     (config:any) => {
+      console.log(config)
       config.headers.Authorization  = `Bearer ${localStorage.getItem('token')}`;
       //  loading = ElLoading.service({
       //   lock: true,
@@ -90,10 +91,12 @@ request.interceptors.request.use(
     },
   
     (error) => {
+      console.log(error)
        if(error.response.status===401){
         if(error.config.url==='/v1/login'){
           ElMessage.error('The user name or password is incorrect，please check and try again')
         }else{
+          ElMessage.error(error.response.data.detail)
           localStorage.removeItem('token')
           localStorage.removeItem('userInfo')
           window.location.href = '#/login';
@@ -125,10 +128,11 @@ request.interceptors.request.use(
         //   message,
         // });
       } else {
-        ElMessage({
-          message: error.response.data.message,
-          type: 'error',
-        });
+        // ElMessage({
+        //   message: error.response.data.detail,
+        //   type: 'error',
+        // });
+        console.log(error.response.data.detail)
       }
     },
   );
