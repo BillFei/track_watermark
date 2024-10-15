@@ -113,7 +113,7 @@
       elements: elements.value,
       confirmParams: {
         // Make sure to change this to your payment completion page
-        return_url: "https://tools.teclips.cn/#/completionPayment"
+        return_url: "http://localhost:3000/#/completionPayment"
       },
       // redirect: 'if_required' 如果设置redirect: 'if_required'则不跳转returnUrl
     }).then(res=>{

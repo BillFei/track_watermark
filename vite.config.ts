@@ -61,18 +61,17 @@ command,mode
     }   ,        // ****************** 路径配置新增
 
     server: {
-      proxy: {
-        '/api': {
-          target: env.VITE_BASE_API,
-          secure: false,
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ''), // 将请求中/api用空值替换重写，根据实际业务修改
-        },
-      },
-      // host: 'localhost',
+      // proxy: {
+      //   '/apis': {
+      //     target: env.VITE_BASE_API,
+      //     changeOrigin: true,
+      //     rewrite: path => path.replace(/^\/apis/, '') // 将请求中/api用空值替换重写，根据实际业务修改
+      //   },
+      // }
+      host: 'localhost',
 			cors: true,
 			open: true,
-			// hmr: true,
+			hmr: true,
     }
   }
 })

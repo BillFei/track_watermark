@@ -6,7 +6,7 @@
         <el-row justity="center" style="margin-top: 20px;">
           <el-col :span="24" :push="4">
             <el-button size="large" @click="googleLogin" class="bt"  round><img class="img-icon" src="https://accounts.kaleido.ai/assets/login_google-2cb4e02cffa10e473b6e3549e711d537a2311783b8ddf497d3f2616a2784d41f.svg">
-              Google login
+            以 Google 账户继续
           </el-button>
           <!-- <GoogleLogin :callback="onGoogleLoginSuccess" prompt>
             <button class="bt"><img class="img-icon" src="https://accounts.kaleido.ai/assets/login_google-2cb4e02cffa10e473b6e3549e711d537a2311783b8ddf497d3f2616a2784d41f.svg">以 Google 账户继续</button>
@@ -15,7 +15,7 @@
           <el-col :span="24" :push="4">
             <el-button size="large" @click="facebookLogin" class="bt" round>
             <img class="img-icon" src="https://accounts.kaleido.ai/assets/login_facebook-e4f71915bb42ac7f7c61a4936a8981f6182aa26cdd485efb8ab913a58e630856.svg">    
-       Facebook login
+      以 Facebook 账户继续
           </el-button>
           </el-col>
           <el-col>
@@ -51,13 +51,13 @@
         <el-row justity="center" style="margin-top: 20px;">
           <el-col :span="24" :push="4">
             <el-button size="large" @click="googleLogin" class="bt"  round><img class="img-icon" src="https://accounts.kaleido.ai/assets/login_google-2cb4e02cffa10e473b6e3549e711d537a2311783b8ddf497d3f2616a2784d41f.svg">
-              Continue with a Google account
+            以 Google 账户继续
           </el-button>
         </el-col>
           <el-col :span="24" :push="4">
             <el-button size="large" @click="facebookLogin" class="bt" round>
             <img class="img-icon" src="https://accounts.kaleido.ai/assets/login_facebook-e4f71915bb42ac7f7c61a4936a8981f6182aa26cdd485efb8ab913a58e630856.svg">    
-            Continue with Facebook account
+      以 Facebook 账户继续
           </el-button>
           
           </el-col>
@@ -119,7 +119,7 @@
 <script lang="ts" setup>
 import { reactive, ref, defineComponent, onMounted } from "vue";
 import { ElLoading, FormInstance, TabsPaneContext,ElMessage  } from 'element-plus'
-import {getCaptcha,login,register,google_login,getUserInfo} from '@/api/login'
+import {getCaptcha,login,register} from '@/api/login'
 import {useRouter} from 'vue-router'
 import axios from 'axios';
 import FB from 'fb';
@@ -250,34 +250,18 @@ const goLogin = () =>{
     loginMatch.matchPassword = true
     return
   }
-  
-  //登录
+
   login(loginInfo).then(res=>{
     console.log(res)
     if(res && res.access_token) {
-      // const jumping = ElLoading.service({
-      //   text:'Loading...'
-      // }); 
+      ElMessage .success('login successfully');
       localStorage.setItem('token', res.access_token)
-      getloginInfo();
-      // getUserInfo().then(res=>{
-      //   console.log(res)
-      //   if(res.status_code === 200) {
-      //     ElMessage .success('login successfully');
-      //     localStorage.setItem('userInfo',JSON.stringify(res.data))
-      //     setTimeout(function(){
-      //       jumping.close(); // 结束加载
-      //       Router.push({"name": "Home"})
-      //     },1000)
-      //   }else{
-      //     jumping.close(); // 结束加载
-      //     ElMessage.error(res.detail);
-      //   }
-      // }).catch(err=>{
-      //   jumping.close(); // 结束加载
-      // })
+				setTimeout(function(){
+					// window.location.href="http://localhost:3000/#/home"
+          Router.push({"name": "Home"})
+				},1000)
 		}else{
-			ElMessage.error('The account or password is incorrect');
+			ElMessage .error('The account or password is incorrect');
 		}
   })
 }
@@ -369,10 +353,9 @@ const signUp = ()=>{
         if(res && res.access_token) {
           ElMessage .success('login successfully');
           localStorage.setItem('token', res.access_token)
-          getloginInfo();
-          // setTimeout(function(){
-          //   Router.push({"name": "Home"})
-          // },1000)
+          setTimeout(function(){
+            Router.push({"name": "Home"})
+          },1000)
         }else{
           ElMessage .error('The account or password is incorrect');
         }
@@ -405,60 +388,24 @@ const googleLogin = async ()=>{
       const response = await googleAuthCodeLogin();
       const { code } = response;
       console.log(code)
-      // const res = await fetch(import.meta.env.VITE_BASE_API + 'api/v1/google/callback', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ code }),
-      // });
-      // const data = await res.json();
-      // console.log('Backend response:', data);
-      // ElMessage .success('login successfully');
-      // localStorage.setItem('token', data.access_token)
-      // setTimeout(function(){
-      //   Router.push({"name": "Home"})
-      // },1000)
-      google_login({code}).then(res=>{
-        console.log('Backend response:', res);
-        if(res.status === "failure"){
-          ElMessage.error(res.message);
-        }else{
-          ElMessage.success('login successfully');
-          localStorage.setItem('token', res.access_token)
-          getloginInfo();
-        }
-        // setTimeout(function(){
-        //   Router.push({"name": "Home"})
-        // },1000)
-      })
+      const res = await fetch(import.meta.env.VITE_BASE_API + 'api/v1/google/callback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      console.log('Backend response:', data);
+      ElMessage .success('login successfully');
+      localStorage.setItem('token', data.access_token)
+      setTimeout(function(){
+        Router.push({"name": "Home"})
+      },1000)
     } catch (error) {
       console.error('Error during Google login process:', error);
     }
 }
-
-const getloginInfo = () =>{
-  const jumping = ElLoading.service({
-    text:'Loading...'
-  }); 
-  getUserInfo().then(res=>{
-    console.log(res)
-    if(res.status_code === 200) {
-      ElMessage .success('login successfully');
-      localStorage.setItem('userInfo',JSON.stringify(res.data))
-      setTimeout(function(){
-        jumping.close(); // 结束加载
-        Router.push({"name": "Home"})
-      },1000)
-    }else{
-      jumping.close(); // 结束加载
-      ElMessage.error(res.detail);
-    }
-  }).catch(err=>{
-    jumping.close(); // 结束加载
-  })
-}
-
 const facebookLogin = ()=>{
 // FB.login(response => {
 //       if (response.authResponse) {

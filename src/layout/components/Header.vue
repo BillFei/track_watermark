@@ -15,28 +15,22 @@
       </div>
     </div>
     <div>
-      
-    <el-button
-    link
-    size="large" 
-    v-if="userInfo">Credits：{{ userInfo.credits  }} | </el-button>
-    <el-button
+      <el-button
       link
       size="large" 
-      v-if="userInfo">{{userInfo.username}}</el-button>
-    <el-button
-      v-else
-      text
-      bg
-      round
-      size="large" 
-      @click="login">Login</el-button>
+      @click="userInfo?'':login"
+    >
+      {{userInfo?userInfo.username:'Login'}}
+    </el-button>
     <el-button
       text
       bg
       size="large"
       round
-      @click="login">Sign up</el-button>
+      @click="login"
+    >
+      Sign up
+    </el-button>
     </div>
   </a-layout-header>
 </template>
@@ -61,12 +55,7 @@ const menuItem = [{
   title: 'Price'
 }]
 
-// const userInfo = ref(null)
-const userInfo = localStorage.getItem('userInfo')?JSON.parse(localStorage.getItem('userInfo')):''
-
-// if(localStorage.getItem('userInfo')){
-//   userInfo = JSON.parse(localStorage.getItem('userInfo'))
-// }
+const userInfo = localStorage.getItem('userInfo')?JSON.parse(localStorage.getItem('userInfo')):'';
 
 const items = ref(menuItem)
 
