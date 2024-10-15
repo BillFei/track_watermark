@@ -54,6 +54,7 @@
   import {getUserInfo} from '@/api/login'
   import {client,signatureUrl} from '@/utils/ali-oss'
   import {uploadVideo} from '@/api/video'
+  import { getUinfo } from '@/utils/methods'
 
   const router=useRouter()
 
@@ -147,19 +148,16 @@
   }
 
   onMounted(() => {
+    console.log(localStorage.getItem("token"))
     if(localStorage.getItem("token")){
-      getUserInfo().then(res=>{
-        if(res.status_code === 200) {
-          localStorage.setItem('userInfo',JSON.stringify(res.data))
-          watch(() => router.path, (newPath) => {
-            console.log("wwwww")
-            // 路由变化时执行刷新逻辑
-            refreshHeader();
-          });
-        }else{
-          ElMessage .error(res.detail);
-        }
-      })
+      // getUserInfo().then(res=>{
+      //   if(res.status_code === 200) {
+      //     localStorage.setItem('userInfo',JSON.stringify(res.data))
+      //   }else{
+      //     ElMessage .error(res.detail);
+      //   }
+      // })
+      getUinfo();
     }else{
       router.push({name:'Login'})
     }

@@ -31,6 +31,14 @@ export const Routes = [
         //   requireAuth: true,
         // }, 
         
+      },{
+        path: "/personalCenter",
+        name: "PersonalCenter",
+        component: () => import("@/views/personalCenter/personalCenter.vue"),
+        // meta: {
+        //   requireAuth: true,
+        // }, 
+        
       }
     ],
   },{

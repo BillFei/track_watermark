@@ -112,7 +112,7 @@
   import { storeToRefs } from 'pinia'
   import { useTrackStore } from '@/store/track'
   import {client,signatureUrl,getDownloadUrl} from '@/utils/ali-oss'
-  import { genUploadFileName } from '@/utils/methods'
+  import { genUploadFileName,getUinfo } from '@/utils/methods'
   import { onMounted, ref } from 'vue'
   import {uploadVideo,getVideoOneInfo} from '@/api/video'
 
@@ -187,18 +187,18 @@
   const uploadVideoToOss = (videoInfo,file) =>{
     console.log(videoInfo,file)
     const vinfo = videoInfo.media.track[1]
-    const video_credits = vinfo.FrameCount / 15;
-    console.log(video_credits)
-    if(userInfo.role === "NORMALMEMBER"){
-      if(vinfo.Duration > 60){
-        //提示充值
-        theTips.value.show = true
-        theTips.value.attention = 'This function needs to open a membership, confirm to open a member?'
-      }else{  
-        //上传视频
-        toUploadVideo(file);
-      }
-    }else{
+    // const video_credits = vinfo.FrameCount / 15;
+    // console.log(video_credits)
+    // if(userInfo.role === "NORMALMEMBER"){
+    //   if(vinfo.Duration > 60){
+    //     //提示充值
+    //     theTips.value.show = true
+    //     theTips.value.attention = 'This function needs to open a membership, confirm to open a member?'
+    //   }else{  
+    //     //上传视频
+    //     toUploadVideo(file);
+    //   }
+    // }else{
       const user_credis = userInfo.credits;
       const video_credits = vinfo.FrameCount / 15;
       if(video_credits <= user_credis){
@@ -207,7 +207,7 @@
         theTips.value.show = true
         theTips.value.attention = 'Insufficient credits, are you to buy?'
       }
-    }
+    // }
   }
 
   //上传视频到oss
@@ -301,6 +301,7 @@
         if(res.status === "FINISHED"){
           loadingInstance.value.close(); // 结束加载
           clearInterval(intervalId.value);
+          getUinfo();
           const downloadUrlTmp = res.oss_download_path
           trackStore.initDownloadInfo({
             downloadOSSURL: downloadUrlTmp,
